@@ -76,11 +76,15 @@
     return inside;
   }
 
-  const map = L.map('map').setView(zooCenter, 18);
+  // 初始化地图（地图中心与缩放级别）
+const map = L.map('map').setView([35.5494, 139.6654], 17); // 放大一级
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(map);
+// 加载 OpenStreetMap 底图，允许最大缩放到 22
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 22,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
 
   const treasureIcon = L.icon({
     iconUrl: 'https://cdn.jsdelivr.net/gh/zhuh49092/zoo-treasure@main/images/treasure.png',
