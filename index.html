@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>夢見ヶ崎動物勇者団MAP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Leaflet 样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+
+<!-- 地图容器 -->
+<div id="map"></div>
+
+<!-- Leaflet 脚本 -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  // 🔗 Google Apps Script 输出的 JSON 数据链接
+  const DATA_URL = "https://script.google.com/macros/s/AKfycbzHaderNePA4l5F-HKoivGzoLW8uY1a-i41so_E3ySRJgKy_QyAuiZx6v-3IvQ7iA5t/exec";
+
+  // 投稿表单链接
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdGgaCCAbhCTAG6G_sxvvzRqnlW_gmEKtHZbprT9XYaHDL3gg/viewform?usp=dialog";
+
+  // 初始化地图
+  const map = L.map('map').setView([35.549, 139.665], 17);
+
+  // 加载 OpenStreetMap 底图
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // 自定义宝箱 icon
+  const treasureIcon = L.icon({
+    iconUrl: 'https://cdn.jsdelivr.net/gh/zhuh49092/zoo-treasure@main/images/treasure.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -35]
+  });
+
+  // 加载 JSON 数据并添加 Marker
+  fetch(DATA_URL)
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(point => {
+        const [lat, lng] = point["lat/long"].split(',').map(Number);
+        const popupContent = `
+          <div>
+            <img src="${point.image_url}" width="100%" /><br>
+            <p>${point.text}</p>
+            <a href="${FORM_URL}" target="_blank">▶ 投稿して宝箱を開けよう！</a>
+          </div>
+        `;
+        const marker = L.marker([lat, lng], { icon: treasureIcon }).addTo(map);
+        marker.bindPopup(popupContent);
+      });
+    })
+    .catch(error => {
+      console.error("读取 JSON 数据失败：", error);
+    });
+
+</script>
+
+</body>
+</html>
