@@ -113,7 +113,15 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             </div>
           `;
         } else {
-          const formLink = `${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=user`;
+          // 生成或读取匿名 ID
+          let anonId = localStorage.getItem("anon_id");
+          if (!anonId) {
+            anonId = crypto.randomUUID();
+            localStorage.setItem("anon_id", anonId);
+          }
+
+          const formLink = `${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}`;
+
           popupContent = `<a href="${formLink}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
         }
 
