@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <title>夢見ヶ崎動物勇者団MAP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- Leaflet 样式 -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     body, html { margin: 0; padding: 0; height: 100%; }
@@ -13,12 +11,8 @@
   </style>
 </head>
 <body>
-
 <div id="map"></div>
-
-<!-- Leaflet 脚本 -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 <script>
   const DATA_URL = "https://script.google.com/macros/s/AKfycbzHaderNePA4l5F-HKoivGzoLW8uY1a-i41so_E3ySRJgKy_QyAuiZx6v-3IvQ7iA5t/exec";
   const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdGgaCCAbhCTAG6G_sxvvzRqnlW_gmEKtHZbprT9XYaHDL3gg/viewform";
@@ -28,42 +22,25 @@
     uid: "entry.67686671"
   };
 
-  // 动物园 Polygon（来自 geojson.io）
   const zooPolygon = [
-    [35.55111667666458, 139.66350319065828],
-    [35.55037555236733, 139.66330323288275],
-    [35.54976698176476, 139.66329582703997],
-    [35.549682625079285, 139.66351800234565],
-    [35.549869414764046, 139.6635772490934],
-    [35.54966454863467, 139.66420674579285],
-    [35.54936929946953, 139.66407344060974],
-    [35.54903187052139, 139.66445854447323],
-    [35.548646235697746, 139.66543611581847],
-    [35.54868238904136, 139.66593971317758],
-    [35.54811598478793, 139.666117453421],
-    [35.54779060181167, 139.66648033975434],
-    [35.548055728780824, 139.66659142740713],
-    [35.54783880678012, 139.66712464814105],
-    [35.54774239681356, 139.66772452146557],
-    [35.54748329445478, 139.66830217725993],
-    [35.54741098666999, 139.66859841100086],
-    [35.5476339354631, 139.66859100515796],
-    [35.547995472728374, 139.66807259611147],
-    [35.548640210139496, 139.66771711562274],
-    [35.54961634476386, 139.66593230733298],
-    [35.54965249767004, 139.66551017425365],
-    [35.549815185545, 139.66520653466824],
-    [35.549983898549016, 139.66528059310343],
-    [35.55031529805828, 139.66465109640416],
-    [35.55058644209245, 139.6644067035682],
-    [35.55063464538, 139.66411787567017],
-    [35.55088771216603, 139.66394754126952],
+    [35.55111667666458, 139.66350319065828], [35.55037555236733, 139.66330323288275],
+    [35.54976698176476, 139.66329582703997], [35.549682625079285, 139.66351800234565],
+    [35.549869414764046, 139.6635772490934], [35.54966454863467, 139.66420674579285],
+    [35.54936929946953, 139.66407344060974], [35.54903187052139, 139.66445854447323],
+    [35.548646235697746, 139.66543611581847], [35.54868238904136, 139.66593971317758],
+    [35.54811598478793, 139.666117453421], [35.54779060181167, 139.66648033975434],
+    [35.548055728780824, 139.66659142740713], [35.54783880678012, 139.66712464814105],
+    [35.54774239681356, 139.66772452146557], [35.54748329445478, 139.66830217725993],
+    [35.54741098666999, 139.66859841100086], [35.5476339354631, 139.66859100515796],
+    [35.547995472728374, 139.66807259611147], [35.548640210139496, 139.66771711562274],
+    [35.54961634476386, 139.66593230733298], [35.54965249767004, 139.66551017425365],
+    [35.549815185545, 139.66520653466824], [35.549983898549016, 139.66528059310343],
+    [35.55031529805828, 139.66465109640416], [35.55058644209245, 139.6644067035682],
+    [35.55063464538, 139.66411787567017], [35.55088771216603, 139.66394754126952],
     [35.55111667666458, 139.66350319065828]
   ];
+  const zooCenter = [35.5496, 139.6648];
 
-  const zooCenter = [35.5496, 139.6648]; // 动物园中心备用
-
-  // 判断点是否在多边形内
   function isInsidePolygon(point, polygon) {
     let [x, y] = point;
     let inside = false;
@@ -76,73 +53,55 @@
     return inside;
   }
 
-  // 初始化地图（地图中心与缩放级别）
-const map = L.map('map').setView([35.5494, 139.6654], 17); // 放大一级
-
-// 加载 OpenStreetMap 底图，允许最大缩放到 22
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 22,
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
+  const map = L.map('map').setView([35.5494, 139.6654], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 22,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
   const treasureIcon = L.icon({
     iconUrl: 'https://cdn.jsdelivr.net/gh/zhuh49092/zoo-treasure@main/images/treasure.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -28]
+    iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -28]
   });
 
-  // 取得 URL 参数（投稿后带回来的 openedId）
   const urlParams = new URLSearchParams(window.location.search);
   const openedId = urlParams.get("opened");
 
-  // 添加宝箱 Marker
+  let anonId = localStorage.getItem("anon_id");
+  if (!anonId) {
+    anonId = crypto.randomUUID();
+    localStorage.setItem("anon_id", anonId);
+  }
+
   fetch(DATA_URL)
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
       data.forEach(point => {
         const [lat, lng] = point["lat/long"].split(',').map(Number);
-        let popupContent = "";
-
-        if (point.id === openedId) {
-          popupContent = `
-            <div>
-              <img src="${point.image_url}" width="100%"><br>
-              <p>${point.text}</p>
-            </div>
-          `;
-        } else {
-          // 生成或读取匿名 ID
-          let anonId = localStorage.getItem("anon_id");
-          if (!anonId) {
-            anonId = crypto.randomUUID();
-            localStorage.setItem("anon_id", anonId);
-          }
-
-          const formLink = `${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}`;
-
-          popupContent = `<a href="${formLink}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
-        }
+        let popupContent = point.id === openedId
+          ? `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`
+          : `<a href="${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
 
         const marker = L.marker([lat, lng], { icon: treasureIcon }).addTo(map);
         marker.bindPopup(popupContent);
+
+        if (point.id === openedId) {
+          marker.openPopup();
+        }
       });
     });
 
-  // 初始定位并调整视图
   navigator.geolocation.getCurrentPosition(pos => {
     const userLatLng = [pos.coords.latitude, pos.coords.longitude];
-    map.setView(userLatLng, 18);
-
     if (!isInsidePolygon(userLatLng, zooPolygon)) {
-      map.setView(zooCenter, 18); // 不在园区内则居中
+      map.setView(zooCenter, 18);
+    } else {
+      map.setView(userLatLng, 18);
     }
   }, err => {
-    console.warn("无法获取定位，使用默认中心");
+    console.warn("定位失败，使用默认中心");
     map.setView(zooCenter, 18);
   });
 </script>
-
 </body>
 </html>
