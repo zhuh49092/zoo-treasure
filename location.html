@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>位置を確認中…</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<p>位置情報を確認しています…</p>
+
+<script>
+// 投稿表单字段 ID
+const FORM_BASE = "https://docs.google.com/forms/d/e/1FAIpQLSdGgaCCAbhCTAG6G_sxvvzRqnlW_gmEKtHZbprT9XYaHDL3gg/viewform";
+const ENTRY_LAT = "entry.248930330";
+const ENTRY_LNG = "entry.1919636561";
+const ENTRY_ID  = "entry.67686671";
+
+// 匿名 ID（可改成随机或LocalStorage获取）
+const anonId = "user";
+
+// 公园默认中心位置
+const fallbackLat = 35.549588; 
+const fallbackLng = 139.664409;
+
+// 多边形边界（动物园 Polygon）
+const zooPolygon = [
+  [35.55111667666458, 139.66350319065828],
+  [35.55037555236733, 139.66330323288275],
+  [35.54976698176476, 139.66329582703997],
+  [35.549682625079285, 139.66351800234565],
+  [35.549869414764046, 139.6635772490934],
+  [35.54966454863467, 139.66420674579285],
+  [35.54936929946953, 139.66407344060974],
+  [35.54903187052139, 139.66445854447323],
+  [35.548646235697746, 139.66543611581847],
+  [35.54868238904136, 139.66593971317758],
+  [35.54811598478793, 139.666117453421],
+  [35.54779060181167, 139.66648033975434],
+  [35.548055728780824, 139.66659142740713],
+  [35.54783880678012, 139.66712464814105],
+  [35.54774239681356, 139.66772452146557],
+  [35.54748329445478, 139.66830217725993],
+  [35.54741098666999, 139.66859841100086],
+  [35.5476339354631, 139.66859100515796],
+  [35.547995472728374, 139.66807259611147],
+  [35.548640210139496, 139.66771711562274],
+  [35.54961634476386, 139.66593230733298],
+  [35.54965249767004, 139.66551017425365],
+  [35.549815185545, 139.66520653466824],
+  [35.549983898549016, 139.66528059310343],
+  [35.55031529805828, 139.66465109640416],
+  [35.55058644209245, 139.6644067035682],
+  [35.55063464538, 139.66411787567017],
+  [35.55088771216603, 139.66394754126952],
+  [35.55111667666458, 139.66350319065828]
+];
+
+// 判断是否在多边形内（射线法）
+function isInsidePolygon(lat, lng, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+
+    const intersect = ((yi > lng) !== (yj > lng)) &&
+                      (lat < (xj - xi) * (lng - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+// 拼接跳转链接
+function redirectWith(lat, lng) {
+  const formURL = `${FORM_BASE}?usp=pp_url&${ENTRY_LAT}=${lat}&${ENTRY_LNG}=${lng}&${ENTRY_ID}=${anonId}`;
+  window.location.href = formURL;
+}
+
+// 定位用户
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    const inside = isInsidePolygon(lat, lng, zooPolygon);
+    if (inside) {
+      redirectWith(lat, lng);
+    } else {
+      redirectWith(fallbackLat, fallbackLng);
+    }
+  },
+  (error) => {
+    console.warn("定位失败，使用默认中心点：", error.message);
+    redirectWith(fallbackLat, fallbackLng);
+  },
+  { enableHighAccuracy: true, timeout: 5000 }
+);
+</script>
+</body>
+</html>
