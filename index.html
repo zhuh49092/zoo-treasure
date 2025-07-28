@@ -73,13 +73,13 @@
 
   const markers = {};
 
-  // 加上时间戳避免缓存
   fetch(DATA_URL + "?t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       data.forEach(point => {
-        const [lat, lng] = point["lat/long"].split(',').map(Number);
-        const popupContent = `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`;
+        const lat = Number(point.lat);
+        const lng = Number(point.lng);
+        const popupContent = point.content || `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`;
         const submitLink = `<a href="${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}&id=${point.id}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
 
         const marker = L.marker([lat, lng], { icon: treasureIcon }).addTo(map);
@@ -88,11 +88,10 @@
         marker.bindPopup(point.id === openId ? popupContent : submitLink);
       });
 
-      // 👇 等数据加载完后再尝试弹窗（轮询模式）
+      // 弹窗逻辑
       if (openId) {
         let attempts = 0;
         const maxAttempts = 10;
-
         const tryOpenPopup = () => {
           if (markers[openId]) {
             markers[openId].openPopup();
@@ -102,7 +101,6 @@
             setTimeout(tryOpenPopup, 1000);
           }
         };
-
         tryOpenPopup();
       }
     });
