@@ -73,7 +73,8 @@
 
   const markers = {};
 
-  fetch(DATA_URL)
+  // 加上时间戳避免缓存
+  fetch(DATA_URL + "?t=" + new Date().getTime())
     .then(res => res.json())
     .then(data => {
       data.forEach(point => {
@@ -84,15 +85,26 @@
         const marker = L.marker([lat, lng], { icon: treasureIcon }).addTo(map);
         markers[point.id] = marker;
 
-        // 统一绑定内容
-        if (point.id === openId) {
-          marker.bindPopup(popupContent);
-          marker.openPopup();
-          map.setView([lat, lng], 18);
-        } else {
-          marker.bindPopup(submitLink);
-        }
+        marker.bindPopup(point.id === openId ? popupContent : submitLink);
       });
+
+      // 👇 等数据加载完后再尝试弹窗（轮询模式）
+      if (openId) {
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const tryOpenPopup = () => {
+          if (markers[openId]) {
+            markers[openId].openPopup();
+            map.setView(markers[openId].getLatLng(), 18);
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(tryOpenPopup, 1000);
+          }
+        };
+
+        tryOpenPopup();
+      }
     });
 
   navigator.geolocation.getCurrentPosition(pos => {
