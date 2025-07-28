@@ -36,10 +36,11 @@
     [35.549815185545, 139.66520653466824], [35.549983898549016, 139.66528059310343],
     [35.55031529805828, 139.66465109640416], [35.55058644209245, 139.6644067035682],
     [35.55063464538, 139.66411787567017], [35.55088771216603, 139.66394754126952],
-    [35.55111667666458, 139.66350319065828]]; // 与之前相同，略
+    [35.55111667666458, 139.66350319065828]];
   const zooCenter = [35.5496, 139.6648];
 
-  function isInsidePolygon(point, polygon) {let [x, y] = point;
+  function isInsidePolygon(point, polygon) {
+    let [x, y] = point;
     let inside = false;
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
       let [yi, xi] = polygon[i];
@@ -47,9 +48,10 @@
       let intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi + 1e-10) + xi);
       if (intersect) inside = !inside;
     }
-    return inside; } // 与之前相同，略
+    return inside;
+  }
 
-  const map = L.map('map').setView([35.5494, 139.6654], 17);
+  const map = L.map('map').setView(zooCenter, 17);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 22,
     attribution: '&copy; OpenStreetMap contributors'
@@ -61,7 +63,7 @@
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  const openId = urlParams.get("open"); // 更新：接收 "open" 参数
+  const openId = urlParams.get("open"); // 使用 "open" 作为参数名
 
   let anonId = localStorage.getItem("anon_id");
   if (!anonId) {
@@ -69,28 +71,24 @@
     localStorage.setItem("anon_id", anonId);
   }
 
-  const markers = {}; // 新增: 像影存放并以id为键
+  const markers = {};
 
   fetch(DATA_URL)
     .then(res => res.json())
     .then(data => {
       data.forEach(point => {
         const [lat, lng] = point["lat/long"].split(',').map(Number);
-        const isOpened = point.id === openId;
-        const popupContent = isOpened
-          ? `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`
-          : `<a href="${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}&id=${point.id}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
+        const popupContent = `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`;
+        const submitLink = `<a href="${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}&id=${point.id}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
 
         const marker = L.marker([lat, lng], {
-          icon: treasureIcon,
-          customId: point.id // 新增: 保存id
+          icon: treasureIcon
         }).addTo(map);
 
-        marker.bindPopup(popupContent);
+        marker.bindPopup(point.id === openId ? popupContent : submitLink);
         markers[point.id] = marker;
       });
 
-      // 新增: 如果URL中有open id，打开对应popup
       if (openId && markers[openId]) {
         markers[openId].openPopup();
       }
@@ -103,8 +101,7 @@
     } else {
       map.setView(userLatLng, 18);
     }
-  }, err => {
-    console.warn("定位失败，使用默认中心");
+  }, () => {
     map.setView(zooCenter, 18);
   });
 </script>
