@@ -63,7 +63,7 @@
   });
 
   const urlParams = new URLSearchParams(window.location.search);
-  const openId = urlParams.get("open"); // 使用 "open" 作为参数名
+  const openId = urlParams.get("open");
 
   let anonId = localStorage.getItem("anon_id");
   if (!anonId) {
@@ -81,17 +81,18 @@
         const popupContent = `<div><img src="${point.image_url}" width="100%"><p>${point.text}</p></div>`;
         const submitLink = `<a href="${FORM_URL}?${FORM_PARAMS.lat}=${lat}&${FORM_PARAMS.lng}=${lng}&${FORM_PARAMS.uid}=${encodeURIComponent(anonId)}&id=${point.id}" target="_blank">▶ 投稿して宝箱を開けよう！</a>`;
 
-        const marker = L.marker([lat, lng], {
-          icon: treasureIcon
-        }).addTo(map);
-
-        marker.bindPopup(point.id === openId ? popupContent : submitLink);
+        const marker = L.marker([lat, lng], { icon: treasureIcon }).addTo(map);
         markers[point.id] = marker;
-      });
 
-      if (openId && markers[openId]) {
-        markers[openId].openPopup();
-      }
+        // 统一绑定内容
+        if (point.id === openId) {
+          marker.bindPopup(popupContent);
+          marker.openPopup();
+          map.setView([lat, lng], 18);
+        } else {
+          marker.bindPopup(submitLink);
+        }
+      });
     });
 
   navigator.geolocation.getCurrentPosition(pos => {
